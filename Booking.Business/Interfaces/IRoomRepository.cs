@@ -9,6 +9,6 @@ namespace Booking.Business.Interfaces
 {
     public interface IRoomRepository: IRepository<Room>
     {
-        
+        Task<IEnumerable<Room>> GetRoomsWithReservations();
     }
 }

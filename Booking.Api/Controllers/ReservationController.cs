@@ -52,7 +52,7 @@ namespace Booking.Api.Controllers
         [HttpGet("{id:guid}")]
         public async Task<ReservationViewModel> GetById(Guid id)
         {
-            var reservation = _mapper.Map<ReservationViewModel>(await _reservationRepository.GetById(id));
+            var reservation = _mapper.Map<ReservationViewModel>(await _reservationRepository.GetReservation(id));
             return reservation;
         }
 
