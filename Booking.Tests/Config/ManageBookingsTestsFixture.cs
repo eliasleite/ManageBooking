@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Moq.AutoMock;
 using Xunit;
-using System.Linq;
 using Bogus;
 using Booking.Business.Services;
 using Booking.Business.Models;
@@ -19,6 +16,67 @@ namespace Booking.Tests.Config
         public RoomService RoomService;
         public ReservationService ReservationService;
         public AutoMocker AutoMocker;
+
+        public Room GenerateValidRoom() 
+        {
+            return GenerateRooms(1).FirstOrDefault();
+        }
+
+        public Reservation GenerateValidReservation()
+        {
+            return GenerateReservations(1).FirstOrDefault();
+        }
+
+        public Room GenerateInvalidRoom() 
+        {
+            var room = new Faker<Room>()
+                    .CustomInstantiator(r => new Room
+                    {
+                        Id = Guid.NewGuid(),
+                        Number = r.Random.Number(100, 9999),
+                        Floor = r.Random.Number(1, 99),
+                        Description = "",
+                        Active = true,
+                        Price = 0
+                    });
+
+            return room;
+        }
+
+        public Reservation GenerateInvalidaReservation() 
+        {
+            var reservation = new Faker<Reservation>()
+                    .CustomInstantiator(r => new Reservation
+                    {
+                        Id = Guid.NewGuid(),
+                        RoomId = Guid.NewGuid(),
+                        ReservationDate = DateTime.Now,
+                        CheckInDate = DateTime.Now,
+                        StartDate = DateTime.Now,
+                        EndDate = DateTime.Now,
+                        Price = 0
+                    });
+
+            return reservation;
+        }
+
+        public IEnumerable<Reservation> GetDistinctReservations(int amount)
+        {
+            var reservations = new List<Reservation>();
+
+            reservations.AddRange(GenerateReservations(amount).ToList());
+
+            return reservations;
+        }
+
+        public List<Room> GetDistinctRooms(int amount) 
+        {
+            var rooms = new List<Room>();
+
+            rooms.AddRange(GenerateRooms(amount).ToList());
+
+            return rooms;
+        }
 
         public IEnumerable<Room> GenerateRooms(int amount) 
         {
@@ -34,6 +92,23 @@ namespace Booking.Tests.Config
                 });
 
             return rooms.Generate(amount);
+        }
+
+        public IEnumerable<Reservation> GenerateReservations(int amount) 
+        {
+            var reservations = new Faker<Reservation>()
+                .CustomInstantiator(r => new Reservation
+                {
+                    Id = Guid.NewGuid(),
+                    RoomId = Guid.NewGuid(),
+                    ReservationDate = DateTime.Now,
+                    CheckInDate = DateTime.Now,                    
+                    StartDate = r.Date.Soon(3),
+                    EndDate = r.Date.Soon(4),
+                    Price = r.Random.Decimal(30, 999)
+                });
+
+            return reservations.Generate(amount);
         }
 
         public ReservationService GetReservationService() 

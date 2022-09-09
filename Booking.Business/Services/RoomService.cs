@@ -27,6 +27,13 @@ namespace Booking.Business.Services
 
         public async Task Delete(Guid id)
         {
+            var room = await _roomRepository.GetById(id);
+            if (room == null) 
+            {
+                Notificate("There is no room with this id");
+                return;
+            }
+
             await _roomRepository.Delete(id);
         }
 
@@ -38,6 +45,19 @@ namespace Booking.Business.Services
         public async Task Update(Room room)
         {
             if (!ExecuteValidation(new RoomValidation(), room)) return;
+
+            var rooms = _roomRepository.GetAll().Result;
+            var anyEqualRoom = rooms.Where(r => r.Description == room.Description
+             && r.Floor == room.Floor
+             && r.Number == room.Number
+             && r.Price == room.Price
+            ).Any();
+
+            if (anyEqualRoom) 
+            {
+                Notificate("There is already a room with this data");
+                return;
+            }
 
             await _roomRepository.Update(room);
         }
