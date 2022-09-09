@@ -43,7 +43,7 @@ namespace Booking.Tests.Config
             return room;
         }
 
-        public Reservation GenerateInvalidaReservation() 
+        public Reservation GenerateInvalidReservation() 
         {
             var reservation = new Faker<Reservation>()
                     .CustomInstantiator(r => new Reservation
@@ -60,7 +60,7 @@ namespace Booking.Tests.Config
             return reservation;
         }
 
-        public IEnumerable<Reservation> GetDistinctReservations(int amount)
+        public List<Reservation> GetDistinctReservations(int amount)
         {
             var reservations = new List<Reservation>();
 
@@ -101,10 +101,9 @@ namespace Booking.Tests.Config
                 {
                     Id = Guid.NewGuid(),
                     RoomId = Guid.NewGuid(),
-                    ReservationDate = DateTime.Now,
-                    CheckInDate = DateTime.Now,                    
-                    StartDate = r.Date.Soon(3),
-                    EndDate = r.Date.Soon(4),
+                    ReservationDate = DateTime.Now,               
+                    StartDate = r.Date.Soon(2, DateTime.Now.AddDays(1).AddHours(1)),
+                    EndDate = r.Date.Soon(3, DateTime.Now.AddDays(3)),
                     Price = r.Random.Decimal(30, 999)
                 });
 

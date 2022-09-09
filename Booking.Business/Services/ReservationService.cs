@@ -23,13 +23,20 @@ namespace Booking.Business.Services
         {
             if (!ExecuteValidation(new ReservationValidation(), reservation)) return;
 
-            CalculateReservationPrice(reservation);
+            //CalculateReservationPrice(reservation);
 
             await _reservationRepository.Add(reservation);
         }
 
         public async Task Delete(Guid id)
         {
+            var reservation = await _reservationRepository.GetById(id);
+            if (reservation == null)
+            {
+                Notificate("There is no rreservationoom with this id");
+                return;
+            }
+
             await _reservationRepository.Delete(id);
         }
 
@@ -42,7 +49,20 @@ namespace Booking.Business.Services
         {
             if (!ExecuteValidation(new ReservationValidation(), reservation)) return;
 
-            CalculateReservationPrice(reservation);
+            var reservations = _reservationRepository.GetAll().Result;
+
+            var anyEqualReservation = reservations.Where(r => r.StartDate == reservation.StartDate
+            && r.EndDate == reservation.EndDate 
+            && r.ReservationDate == reservation.ReservationDate 
+            && r.RoomId == reservation.RoomId).Any();
+
+            if (anyEqualReservation)
+            {
+                Notificate("There is already a reservation with this data");
+                return;
+            }
+
+            //CalculateReservationPrice(reservation);
 
             await _reservationRepository.Update(reservation);
         }
