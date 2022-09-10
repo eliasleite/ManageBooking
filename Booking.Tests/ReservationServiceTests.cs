@@ -1,4 +1,6 @@
-﻿using Booking.Business.Interfaces;
+﻿using Bogus;
+using Booking.Business.Interfaces;
+using Booking.Business.Models.Validations;
 using Booking.Business.Notifications;
 using Booking.Business.Services;
 using Booking.Tests.Config;
@@ -95,7 +97,8 @@ namespace Booking.Tests
                 .Returns(Task.FromResult(_manageBookingsTestsFixture.GetDistinctReservations(10)));
 
             // Act
-            reservation.StartDate = reservation.StartDate.AddDays(1).AddHours(1);
+            reservation.StartDate = reservation.StartDate.AddDays(1).AddHours(11);
+            reservation.EndDate = reservation.EndDate.AddDays(1).AddHours(15);
             _reservationService.Update(reservation).GetAwaiter().GetResult();
 
             // Assert

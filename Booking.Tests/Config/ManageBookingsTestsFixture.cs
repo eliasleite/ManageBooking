@@ -102,8 +102,8 @@ namespace Booking.Tests.Config
                     Id = Guid.NewGuid(),
                     RoomId = Guid.NewGuid(),
                     ReservationDate = DateTime.Now,               
-                    StartDate = r.Date.Soon(2, DateTime.Now.AddDays(1).AddHours(1)),
-                    EndDate = r.Date.Soon(3, DateTime.Now.AddDays(3)),
+                    StartDate = r.Date.Between(DateTime.Now.AddDays(1).AddHours(1), DateTime.Now.AddDays(1).AddHours(10)),
+                    EndDate = r.Date.Between(DateTime.Now.AddDays(1).AddHours(12), DateTime.Now.AddDays(3)),
                     Price = r.Random.Decimal(30, 999)
                 });
 

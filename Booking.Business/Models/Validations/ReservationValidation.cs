@@ -19,7 +19,7 @@ namespace Booking.Business.Models.Validations
             RuleFor(r => r.StartDate)
                 .NotEmpty().WithMessage("The field {PropertyName} needs to be provided")
                 .Must(BeAValidDate).WithMessage("The field {PropertyName} needs to be valid")
-                .GreaterThanOrEqualTo(r => r.ReservationDate.AddDays(1)).WithMessage("The start date for the reservation should be at least 1 day after the current date.");
+                .GreaterThan(r => r.ReservationDate.AddDays(1)).WithMessage("The start date for the reservation should be at least 1 day after the current date.");
 
             RuleFor(r => r.EndDate)
                 .NotEmpty().WithMessage("The field {PropertyName} needs to be provided")
