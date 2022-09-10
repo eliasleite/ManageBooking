@@ -22,6 +22,14 @@ namespace Booking.Business.Services
         {
             if (!ExecuteValidation(new RoomValidation(), room)) return;
 
+            var rooms = await _roomRepository.GetAll();
+
+            if (rooms.Count() > 0) 
+            {
+                Notificate("This Hotel has only on room available, you cannot insert another one.");
+                return;                
+            }           
+            
             await _roomRepository.Add(room);
         }
 

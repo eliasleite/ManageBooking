@@ -27,6 +27,8 @@ namespace Booking.Tests
         {
             // Arrange 
             var room = _manageBookingsTestsFixture.GenerateValidRoom();
+            _manageBookingsTestsFixture.AutoMocker.GetMock<IRoomRepository>().Setup(r => r.GetAll())
+                .Returns(Task.FromResult(_manageBookingsTestsFixture.GetDistinctRooms(0)));
 
             // Act
             _roomService.Add(room).GetAwaiter().GetResult();
