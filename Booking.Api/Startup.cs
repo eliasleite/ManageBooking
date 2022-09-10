@@ -14,6 +14,9 @@ using KissLog.CloudListeners.RequestLogsListener;
 using KissLog.Formatters;
 using System;
 using Booking.Api.Extensions;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using HealthChecks.UI.Client;
+using System.Net.Http;
 
 namespace Booking.Api
 {
@@ -61,6 +64,9 @@ namespace Booking.Api
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Booking.Api", Version = "v1" });
             });
 
+            services.AddHealthChecks()
+                .AddSqlServer(Configuration.GetConnectionString("DefaultConnection"), name: "SqlHealth");          
+
             services.ResolveDependencies();
         }
 
@@ -87,10 +93,14 @@ namespace Booking.Api
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+
+                endpoints.MapHealthChecks("/api/hc");
             });
 
             new LoggerConfig().RegisterKissLogListeners(Configuration);
-        }
 
+            app.UseHealthChecks("/api/hc");
+           
+        }
     }
 }
