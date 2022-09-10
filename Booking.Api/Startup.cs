@@ -2,18 +2,18 @@ using Booking.Api.Configuration;
 using Booking.Data.Context;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using KissLog;
+using KissLog.AspNetCore;
+using KissLog.CloudListeners.Auth;
+using KissLog.CloudListeners.RequestLogsListener;
+using KissLog.Formatters;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Booking.Api.Extensions;
 
 namespace Booking.Api
 {
@@ -29,6 +29,23 @@ namespace Booking.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHttpContextAccessor();
+
+            services.AddLogging(logging =>
+            {
+                logging.AddKissLog(options =>
+                {
+                    options.Formatter = (FormatterArgs args) =>
+                    {
+                        if (args.Exception == null)
+                            return args.DefaultValue;
+
+                        string exceptionStr = new ExceptionFormatter().Format(args.Exception, args.Logger);
+
+                        return string.Join(Environment.NewLine, new[] { args.DefaultValue, exceptionStr });
+                    };
+                });
+            });
 
             services.AddDbContext<ManageBookingContext>(options =>
             {
@@ -50,6 +67,8 @@ namespace Booking.Api
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseKissLogMiddleware();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -63,10 +82,15 @@ namespace Booking.Api
 
             app.UseAuthorization();
 
+            app.UseMiddleware<ExceptionMiddleware>();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
+            new LoggerConfig().RegisterKissLogListeners(Configuration);
         }
+
     }
 }

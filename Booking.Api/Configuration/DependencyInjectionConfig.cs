@@ -3,6 +3,7 @@ using Booking.Business.Notifications;
 using Booking.Business.Services;
 using Booking.Data.Context;
 using Booking.Data.Repository;
+using KissLog;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,8 @@ namespace Booking.Api.Configuration
     {
         public static IServiceCollection ResolveDependencies(this IServiceCollection services)
         {
+            services.AddScoped<IKLogger>((provider) => Logger.Factory.Get());
+
             services.AddScoped<ManageBookingContext>();
             services.AddScoped<IRoomService, RoomService>();
             services.AddScoped<IReservationService, ReservationService>();
