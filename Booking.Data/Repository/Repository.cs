@@ -39,7 +39,7 @@ namespace Booking.Data.Repository
 
         public async Task<List<TEntity>> GetAll()
         {
-            return await DbSet.ToListAsync();
+            return await DbSet.AsNoTracking().ToListAsync();
         }
 
         public async Task<TEntity> GetById(Guid id)
