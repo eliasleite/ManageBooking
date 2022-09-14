@@ -31,6 +31,8 @@ namespace Booking.Tests
         {
             // Arrange 
             var reservation = _manageBookingsTestsFixture.GenerateValidReservation();
+            _manageBookingsTestsFixture.AutoMocker.GetMock<IReservationRepository>().Setup(r => r.GetAll())
+                .Returns(Task.FromResult(_manageBookingsTestsFixture.GetDistinctReservations(0)));
 
             // Act
             _reservationService.Add(reservation).GetAwaiter().GetResult();

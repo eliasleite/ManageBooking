@@ -23,7 +23,12 @@ namespace Booking.Business.Services
         {
             if (!ExecuteValidation(new ReservationValidation(), reservation)) return;
 
-            //CalculateReservationPrice(reservation);
+            var isValid = await ValidateAddReservationAsync(reservation);
+            if (!isValid)             
+            {
+                Notificate("There is already a reservation with this start date or end date");
+                return;
+            }
 
             await _reservationRepository.Add(reservation);
         }
@@ -33,7 +38,7 @@ namespace Booking.Business.Services
             var reservation = await _reservationRepository.GetById(id);
             if (reservation == null)
             {
-                Notificate("There is no rreservationoom with this id");
+                Notificate("There is no reservation with this id");
                 return;
             }
 
@@ -60,24 +65,53 @@ namespace Booking.Business.Services
             {
                 Notificate("There is already a reservation with this data");
                 return;
-            }
-
-            //CalculateReservationPrice(reservation);
+            }            
 
             await _reservationRepository.Update(reservation);
         }
 
-        public Reservation CalculateReservationPrice(Reservation reservation) 
+        private async Task<bool> ValidateAddReservationAsync(Reservation reservation) 
         {
-            var daysOfReservation = reservation.EndDate - reservation.StartDate;
+            var reservations = await _reservationRepository.GetAll();
+            if (!ValidateAnyEqualDate(reservation, reservations) ||
+                !ValidateAnyBeforeAndBetweenDate(reservation, reservations) ||
+                !ValidateAnyBetweenAndAfterDate(reservation, reservations) ||
+                !ValidateAnyBetweenDate(reservation, reservations) ||
+                !ValidateAnyOutsideDate(reservation, reservations)) 
+            {
+                return false;
+            }
+            return true;
+        }
 
-            reservation.Room = _roomRepository.GetById(reservation.RoomId).Result;
+        private bool ValidateAnyEqualDate(Reservation reservation, List<Reservation> reservations) 
+        {
+            var anyEqual = reservations.Any(x => x.StartDate == reservation.StartDate && x.EndDate == reservation.EndDate);
+            return anyEqual == true ? false : true;
+        }
 
-            var price = reservation.Room.Price * daysOfReservation.Days;
+        private bool ValidateAnyBeforeAndBetweenDate(Reservation reservation, List<Reservation> reservations)
+        {
+            var anyEqual = reservations.Any(x => reservation.StartDate < x.StartDate && reservation.EndDate >= x.StartDate);
+            return anyEqual == true ? false : true;
+        }
 
-            reservation.Price = price;
+        private bool ValidateAnyBetweenAndAfterDate(Reservation reservation, List<Reservation> reservations)
+        {
+            var anyEqual = reservations.Any(x => reservation.StartDate <= x.EndDate && reservation.EndDate >= x.EndDate);
+            return anyEqual == true ? false : true;
+        }
 
-            return reservation;
+        private bool ValidateAnyBetweenDate(Reservation reservation, List<Reservation> reservations)
+        {
+            var anyEqual = reservations.Any(x => reservation.StartDate > x.StartDate && reservation.EndDate < x.EndDate);
+            return anyEqual == true ? false : true;
+        }
+
+        private bool ValidateAnyOutsideDate(Reservation reservation, List<Reservation> reservations)
+        {
+            var anyEqual = reservations.Any(x => reservation.StartDate < x.StartDate && reservation.EndDate > x.EndDate);
+            return anyEqual == true ? false : true;
         }
     }
 }
